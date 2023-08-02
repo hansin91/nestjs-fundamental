@@ -12,14 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    // async module
-    // TypeOrmModule.forRootAsync({
-    //   useFactory: () => dataSourceOptions,
-    // }),
-    // load mongodb
-    MongooseModule.forRoot(
-      'mongodb+srv://superadmin:V3zON16D8BvPOn8c@cluster0.lyep1qf.mongodb.net/?retryWrites=true&w=majority',
-    ),
+    MongooseModule.forRoot(process.env.MONGODB_URL),
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.required(),
