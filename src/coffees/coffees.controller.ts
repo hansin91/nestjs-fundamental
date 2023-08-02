@@ -16,8 +16,6 @@ import { UpdateCoffeeDto } from './dto/update-coffee.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { REQUEST } from '@nestjs/core';
 import { Public } from '../common/decorators/public.decorator';
-import { ParseIntPipe } from '../common/pipes/parse-int.pipe';
-import { Protocol } from '../common/decorators/protocol.decorator';
 import { ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('coffees')
@@ -33,20 +31,13 @@ export class CoffeesController {
   @ApiForbiddenResponse({ description: 'Forbidden.' })
   @Public()
   @Get()
-  async findAll(
-    @Protocol('https') protocol: string,
-    @Query() paginationQuery: PaginationQueryDto,
-  ) {
-    console.log(protocol);
-    // testing timeout interceptors
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
+  async findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.coffeesService.findAll(paginationQuery);
   }
 
   @Public()
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    console.log(id);
+  findOne(@Param('id') id: string) {
     return this.coffeesService.findOne(id);
   }
 
@@ -63,6 +54,6 @@ export class CoffeesController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return `This action removes #${id} coffee`;
+    return this.coffeesService.remove(id);
   }
 }

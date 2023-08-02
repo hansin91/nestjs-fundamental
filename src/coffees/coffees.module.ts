@@ -1,14 +1,11 @@
-import { Injectable, Module, Scope } from '@nestjs/common';
+import { Injectable, Module } from '@nestjs/common';
 import { CoffeesController } from './coffees.controller';
 import { CoffeesService } from './coffees.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Coffee } from './entities/coffee.entity';
-import { Flavor } from './entities/flavor.entity';
-import { Event } from '../events/entities/event.entity';
-import { COFFEE_BRANDS } from './coffees.constants';
-import { DataSource } from 'typeorm';
+import { Coffee, CoffeeSchema } from './entities/coffee.entity';
 import { ConfigModule } from '@nestjs/config';
 import coffeesConfig from './config/coffees.config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Event, EventSchema } from '../events/entities/event.entity';
 
 class ConfigService {}
 class DevelopmentConfigService {}
@@ -24,7 +21,16 @@ export class CoffeeBrandsFactory {
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Coffee, Flavor, Event]),
+    MongooseModule.forFeature([
+      {
+        name: Coffee.name,
+        schema: CoffeeSchema,
+      },
+      {
+        name: Event.name,
+        schema: EventSchema,
+      },
+    ]),
     ConfigModule.forFeature(coffeesConfig),
   ],
   controllers: [CoffeesController],
@@ -38,22 +44,6 @@ export class CoffeeBrandsFactory {
           ? DevelopmentConfigService
           : ProductionConfigService,
     },
-    {
-      provide: COFFEE_BRANDS,
-      useFactory: async (dataSource: DataSource): Promise<any> => {
-        const queryRunner = await dataSource.query('SELECT name FROM flavor');
-        return queryRunner;
-      },
-      scope: Scope.TRANSIENT,
-      inject: [DataSource],
-    },
-    // { provide: COFFEE_BRANDS, useValue: ['buddy brew', 'nescafe'] },
-    // {
-    //   provide: COFFEE_BRANDS, // useFactory
-    //   useFactory: (brandsFactory: CoffeeBrandsFactory) =>
-    //     brandsFactory.create(),
-    //   inject: [CoffeeBrandsFactory],
-    // },
   ],
   exports: [CoffeesService],
 })
