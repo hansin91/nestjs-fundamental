@@ -8,6 +8,8 @@ export class CoffeeRefactor1690700828159 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    `ALTER TABLE "coffee" RENAME COLUMN "name" TO "title"`;
+    await queryRunner.query(
+      `ALTER TABLE "coffee" RENAME COLUMN "name" TO "title"`,
+    );
   }
 }
