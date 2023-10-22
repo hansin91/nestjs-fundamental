@@ -10,10 +10,19 @@ import { Event } from '../events/entities/event.entity';
 import { COFFEE_BRANDS } from './coffees.constants';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import coffeesConfig from './config/coffees.config';
+import { LazyModuleLoader } from '@nestjs/core';
+
+export const COFFEES_DATA_SOURCE = Symbol('COFFEES_DATA_SOURCE');
+export interface CoffeeDataSource {
+  [index: number]: Coffee;
+}
 
 @Injectable()
 export class CoffeesService {
   constructor(
+    @Inject(COFFEES_DATA_SOURCE) dataSource: CoffeeDataSource,
+    private readonly lazyModuleLoader: LazyModuleLoader,
+
     @InjectRepository(Coffee)
     private readonly coffeeRepository: Repository<Coffee>,
     @InjectRepository(Flavor)
@@ -30,6 +39,18 @@ export class CoffeesService {
     console.log(coffeesConfiguration.foo);
     console.log('CoffeesService instantiated');
     console.log(coffeeBrands);
+  }
+
+  async lazyCreate(createCoffeeDto: CreateCoffeeDto) {
+    console.time();
+    const rewardsModuleRef = await this.lazyModuleLoader.load(() =>
+      import('../rewards/rewards.module').then((m) => m.RewardsModule),
+    );
+    const { RewardsService } = await import('../rewards/rewards.service');
+    const rewardService = rewardsModuleRef.get(RewardsService);
+    console.timeEnd();
+    rewardService.grantTo();
+    return 'This actions adds a new coffee';
   }
 
   async findAll(paginationQuery: PaginationQueryDto) {

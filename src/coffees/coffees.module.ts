@@ -1,6 +1,6 @@
 import { Injectable, Module, Scope } from '@nestjs/common';
 import { CoffeesController } from './coffees.controller';
-import { CoffeesService } from './coffees.service';
+import { COFFEES_DATA_SOURCE, CoffeesService } from './coffees.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Coffee } from './entities/coffee.entity';
 import { Flavor } from './entities/flavor.entity';
@@ -30,6 +30,10 @@ export class CoffeeBrandsFactory {
   controllers: [CoffeesController],
   providers: [
     CoffeesService,
+    {
+      provide: COFFEES_DATA_SOURCE,
+      useValue: [],
+    },
     CoffeeBrandsFactory,
     {
       provide: ConfigService, // useClass
